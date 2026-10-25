@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Eventura</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap">
 
 <style>
+/* ── Layout: sticky search header, scrollable results, map panel ── */
 :root {
   --bg: #F7F6F4;
   --bg2: #FFFFFF;
@@ -25,17 +21,29 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #181715; --bg2: #242220; --bg3: #2E2C29;
-    --fg: #F0EEE9; --fg2: #A8A49E; --fg3: #6E6A64;
-    --accent: #E06B52; --accent2: #C8553D; --border: #3A3835;
+    --bg: #181715;
+    --bg2: #242220;
+    --bg3: #2E2C29;
+    --fg: #F0EEE9;
+    --fg2: #A8A49E;
+    --fg3: #6E6A64;
+    --accent: #E06B52;
+    --accent2: #C8553D;
+    --border: #3A3835;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #181715; --bg2: #242220; --bg3: #2E2C29;
-  --fg: #F0EEE9; --fg2: #A8A49E; --fg3: #6E6A64;
-  --accent: #E06B52; --accent2: #C8553D; --border: #3A3835;
+  --bg: #181715;
+  --bg2: #242220;
+  --bg3: #2E2C29;
+  --fg: #F0EEE9;
+  --fg2: #A8A49E;
+  --fg3: #6E6A64;
+  --accent: #E06B52;
+  --accent2: #C8553D;
+  --border: #3A3835;
   --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
   color-scheme: dark;
 }
@@ -50,6 +58,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Safe area for fixed header */
 body::before {
   content: "";
   position: fixed;
@@ -59,8 +68,14 @@ body::before {
   z-index: 100;
 }
 
-#app { display: flex; flex-direction: column; height: 100%; }
+/* ── APP SHELL ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
+/* ── HEADER ── */
 #header {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
@@ -70,99 +85,250 @@ body::before {
   padding: 14px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
 }
 
-.header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-.logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); letter-spacing: -0.02em; flex-shrink: 0; }
-.logo span { color: var(--fg); }
-.search-row { display: flex; gap: 8px; flex: 1; }
-.search-input-wrap { position: relative; flex: 1; }
-.search-input-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--fg3); pointer-events: none; }
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.logo span {
+  color: var(--fg);
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.search-input-wrap svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fg3);
+  pointer-events: none;
+}
 
 #location-input {
-  width: 100%; padding: 10px 12px 10px 38px;
-  border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--bg3); color: var(--fg);
-  font-family: var(--font-body); font-size: 0.9375rem;
-  transition: border-color 0.15s; outline: none;
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  transition: border-color 0.15s;
+  outline: none;
 }
 #location-input::placeholder { color: var(--fg3); }
 #location-input:focus { border-color: var(--accent); background: var(--bg2); }
 
 #search-btn {
-  padding: 10px 18px; background: var(--accent); color: #fff;
-  border: none; border-radius: 8px; font-family: var(--font-body);
-  font-size: 0.9375rem; font-weight: 500; cursor: pointer;
-  white-space: nowrap; transition: background 0.15s, transform 0.1s; flex-shrink: 0;
+  padding: 10px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
 }
 #search-btn:hover { background: var(--accent2); }
 #search-btn:active { transform: scale(0.97); }
 #search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* Date range tabs */
 .date-tabs {
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-  padding-bottom: 12px; -webkit-overflow-scrolling: touch;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
 }
 .date-tabs::-webkit-scrollbar { display: none; }
+
 .date-tab {
-  padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px;
-  background: transparent; color: var(--fg2); font-family: var(--font-body);
-  font-size: 0.8125rem; font-weight: 500; cursor: pointer; white-space: nowrap;
-  transition: all 0.15s; flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--fg2);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
 }
 .date-tab:hover { border-color: var(--accent); color: var(--accent); }
-.date-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.date-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
-#custom-date-row { display: flex; gap: 8px; padding-bottom: 12px; align-items: center; }
+/* Custom date row */
+#custom-date-row {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 12px;
+  align-items: center;
+}
 #custom-date-row input[type="date"] {
-  flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.875rem; outline: none;
+  flex: 1;
+  padding: 7px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
 }
 #custom-date-row input[type="date"]:focus { border-color: var(--accent); }
 #custom-date-row span { color: var(--fg3); font-size: 0.875rem; flex-shrink: 0; }
 
+/* Category chips */
 .category-row {
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-  padding-bottom: 14px; -webkit-overflow-scrolling: touch;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 14px;
+  -webkit-overflow-scrolling: touch;
 }
 .category-row::-webkit-scrollbar { display: none; }
+
 .cat-chip {
-  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
-  border: 1.5px solid var(--border); border-radius: 20px; background: transparent;
-  color: var(--fg2); font-family: var(--font-body); font-size: 0.8125rem; font-weight: 500;
-  cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--fg2);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
 }
 .cat-chip:hover { border-color: var(--accent); color: var(--accent); }
-.cat-chip.active { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.cat-chip.active {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
 .cat-chip .cat-emoji { font-size: 0.875rem; }
 
-#main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+/* ── MAIN CONTENT ── */
+#main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
+/* View toggle */
 #view-bar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
-  border-bottom: 1px solid var(--border); background: var(--bg); gap: 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  gap: 12px;
 }
-.view-toggle { display: flex; gap: 2px; background: var(--bg3); border-radius: 8px; padding: 3px; flex-shrink: 0; }
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 3px;
+  flex-shrink: 0;
+}
 .view-btn {
-  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
-  border: none; border-radius: 6px; background: transparent; color: var(--fg3);
-  font-family: var(--font-body); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg3);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
 }
-.view-btn.active { background: var(--bg2); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.view-btn.active {
+  background: var(--bg2);
+  color: var(--fg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
 .view-btn svg { flex-shrink: 0; }
-#result-count { font-size: 0.875rem; color: var(--fg3); font-variant-numeric: tabular-nums; }
 
-#content-area { flex: 1; overflow: hidden; display: flex; }
+#result-count {
+  font-size: 0.875rem;
+  color: var(--fg3);
+  font-variant-numeric: tabular-nums;
+}
 
+/* ── CONTENT AREA ── */
+#content-area {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Cards panel */
 #cards-panel {
-  flex: 1; overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
   padding: 16px max(16px, env(safe-area-inset-right, 0px)) 80px max(16px, env(safe-area-inset-left, 0px));
   min-width: 0;
 }
+
+/* Map panel */
 #map-panel {
-  flex: 1; overflow: hidden; min-width: 0; background: var(--bg3);
-  display: flex; align-items: center; justify-content: center; position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
+/* Split view: cards left, map right on desktop */
 .view-split #cards-panel { flex: 0 0 420px; border-right: 1px solid var(--border); }
 .view-split #map-panel { flex: 1; }
 .view-cards #map-panel { display: none; }
@@ -170,181 +336,552 @@ body::before {
 .view-map #cards-panel { display: none; }
 .view-map #map-panel { flex: 1; }
 
+/* ── EMPTY / LOADING STATES ── */
 #empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px 24px; text-align: center; gap: 12px; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  gap: 12px;
+  height: 100%;
 }
-.empty-icon { font-size: 3rem; opacity: 0.4; }
-.empty-title { font-family: var(--font-display); font-size: 1.375rem; color: var(--fg); }
-.empty-sub { font-size: 0.9375rem; color: var(--fg3); max-width: 280px; line-height: 1.5; }
+.empty-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+}
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  color: var(--fg);
+}
+.empty-sub {
+  font-size: 0.9375rem;
+  color: var(--fg3);
+  max-width: 280px;
+  line-height: 1.5;
+}
 
 #loading-state {
-  display: none; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px 24px; gap: 16px; height: 100%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+  height: 100%;
 }
 .spinner {
-  width: 36px; height: 36px; border: 3px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite;
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 0.9375rem; color: var(--fg3); }
+.loading-text {
+  font-size: 0.9375rem;
+  color: var(--fg3);
+}
 
-.events-grid { display: flex; flex-direction: column; gap: 12px; }
+/* ── EVENT CARDS ── */
+.events-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .event-card {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--card-shadow); overflow: hidden; transition: box-shadow 0.2s, transform 0.15s;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.15s;
 }
 .event-card:hover {
   box-shadow: 0 4px 16px rgba(26,25,23,0.12), 0 8px 32px rgba(26,25,23,0.08);
   transform: translateY(-1px);
 }
-.card-color-bar { height: 3px; width: 100%; }
-.card-body { padding: 16px; }
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-.card-title { font-family: var(--font-display); font-size: 1.0625rem; line-height: 1.3; color: var(--fg); text-wrap: balance; flex: 1; min-width: 0; }
-.card-actions { display: flex; gap: 4px; flex-shrink: 0; margin-top: 2px; }
+
+.card-color-bar {
+  height: 3px;
+  width: 100%;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--fg);
+  text-wrap: balance;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .icon-btn {
-  width: 32px; height: 32px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--bg3); color: var(--fg3); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
 }
 .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg2); }
 .icon-btn.saved { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.card-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-.meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.8125rem; color: var(--fg2); }
+.icon-btn.bookmarked { border-color: #F59E0B; color: #F59E0B; }
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--fg2);
+}
 .meta-item svg { color: var(--fg3); flex-shrink: 0; }
+
 .card-type-badge {
-  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
-  border-radius: 20px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-bottom: 10px;
 }
+
 .card-footer {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
 }
-.card-price { font-size: 0.875rem; font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.card-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
 .card-price.free { color: #16A34A; }
+
 .ticket-btn {
-  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
-  background: var(--accent); color: #fff; text-decoration: none; border-radius: 7px;
-  font-size: 0.8125rem; font-weight: 500; transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 7px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.15s;
 }
 .ticket-btn:hover { background: var(--accent2); }
 
-.share-row { display: flex; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+/* Share row */
+.share-row {
+  display: flex;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
 .share-btn {
-  display: flex; align-items: center; gap: 5px; padding: 5px 11px;
-  border: 1.5px solid var(--border); border-radius: 7px; background: transparent;
-  color: var(--fg2); font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--fg2);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
 }
 .share-btn:hover { border-color: var(--accent); color: var(--accent); }
 .share-btn svg { flex-shrink: 0; }
+.cal-btn { cursor: pointer; }
 
+/* Category section headers */
 .category-section { margin-bottom: 8px; }
-.category-header { display: flex; align-items: center; gap: 8px; padding: 8px 0 10px; }
-.category-header-title { font-family: var(--font-display); font-size: 1.125rem; color: var(--fg); }
-.category-header-count { font-size: 0.8125rem; color: var(--fg3); font-variant-numeric: tabular-nums; }
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 10px;
+}
+.category-header-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  color: var(--fg);
+}
+.category-header-count {
+  font-size: 0.8125rem;
+  color: var(--fg3);
+  font-variant-numeric: tabular-nums;
+}
 
+/* Load more */
 #load-more-btn {
-  display: none; width: 100%; margin-top: 16px; padding: 12px;
-  border: 1.5px dashed var(--border); border-radius: var(--radius); background: transparent;
-  color: var(--fg2); font-family: var(--font-body); font-size: 0.9375rem; cursor: pointer; transition: all 0.15s;
+  display: none;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--fg2);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 #load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ── MAP ── */
 #map-placeholder {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; color: var(--fg3); font-size: 0.9375rem; text-align: center; padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--fg3);
+  font-size: 0.9375rem;
+  text-align: center;
+  padding: 32px;
 }
 #map-placeholder svg { opacity: 0.3; }
-#map-frame-wrap { display: none; width: 100%; height: 100%; flex-direction: column; }
-#map-links-list { overflow-y: auto; flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+#map-frame-wrap {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+#map-links-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .map-event-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
-  text-decoration: none; color: var(--fg); font-size: 0.875rem; transition: border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--fg);
+  font-size: 0.875rem;
+  transition: border-color 0.15s;
 }
 .map-event-row:hover { border-color: var(--accent); }
-.map-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.map-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 .map-event-info { flex: 1; min-width: 0; }
 .map-event-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .map-event-venue { font-size: 0.8125rem; color: var(--fg3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .open-maps-btn {
-  display: block; text-align: center; padding: 10px; background: var(--accent); color: #fff;
-  text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: background 0.15s; flex-shrink: 0;
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s;
+  flex-shrink: 0;
 }
 .open-maps-btn:hover { background: var(--accent2); }
 
+/* ── SHARE ALL RESULTS ── */
+#share-results-bar {
+  display: none;
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  padding: 12px 16px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 40;
+}
+#share-results-bar.visible { display: flex; }
+.share-bar-title { font-size: 0.875rem; font-weight: 600; color: var(--fg); }
+.share-bar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.share-bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.share-bar-btn:hover { border-color: var(--accent); color: var(--accent); }
+.share-bar-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--fg3);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* ── TOAST ── */
 #toast {
   position: fixed;
   bottom: max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px));
-  left: 50%; transform: translateX(-50%) translateY(20px);
-  background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 8px;
-  font-size: 0.875rem; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
-  pointer-events: none; z-index: 200; white-space: nowrap;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── PROXY CONFIG MODAL ── */
 #config-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
-  display: flex; align-items: center; justify-content: center; padding: 24px;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
+#config-modal[hidden] { display: none !important; }
 .config-box {
-  background: var(--bg2); border-radius: 16px; padding: 28px 24px;
-  max-width: 440px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  background: var(--bg2);
+  border-radius: 16px;
+  padding: 28px 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
 }
-.config-title { font-family: var(--font-display); font-size: 1.375rem; margin-bottom: 8px; color: var(--fg); }
-.config-sub { font-size: 0.9375rem; color: var(--fg2); margin-bottom: 20px; line-height: 1.5; }
+.config-title {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  margin-bottom: 8px;
+  color: var(--fg);
+}
+.config-sub {
+  font-size: 0.9375rem;
+  color: var(--fg2);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
 .config-label {
-  display: block; font-size: 0.8125rem; font-weight: 600; color: var(--fg2);
-  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px;
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--fg2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 #proxy-url-input {
-  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.9375rem;
-  margin-bottom: 16px; outline: none;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  margin-bottom: 16px;
+  outline: none;
 }
 #proxy-url-input:focus { border-color: var(--accent); }
 #save-proxy-btn {
-  width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none;
-  border-radius: 8px; font-family: var(--font-body); font-size: 1rem; font-weight: 500;
-  cursor: pointer; transition: background 0.15s;
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 #save-proxy-btn:hover { background: var(--accent2); }
-.config-note { margin-top: 12px; font-size: 0.8125rem; color: var(--fg3); line-height: 1.5; }
+.config-note {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--fg3);
+  line-height: 1.5;
+}
 
+/* ── NOTION SAVE MODAL ── */
 #notion-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
-  display: none; align-items: flex-end; justify-content: center; padding: 0;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
 }
 #notion-modal.open { display: flex; }
 .notion-sheet {
-  background: var(--bg2); border-radius: 16px 16px 0 0;
+  background: var(--bg2);
+  border-radius: 16px 16px 0 0;
   padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
-  width: 100%; max-width: 540px; box-shadow: 0 -4px 32px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.2);
 }
-.sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-.sheet-title { font-family: var(--font-display); font-size: 1.125rem; margin-bottom: 16px; color: var(--fg); }
-.notion-event-preview { background: var(--bg3); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9375rem; color: var(--fg); line-height: 1.5; }
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.sheet-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  margin-bottom: 16px;
+  color: var(--fg);
+}
+.notion-event-preview {
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 0.9375rem;
+  color: var(--fg);
+  line-height: 1.5;
+}
 .notion-event-preview strong { font-weight: 600; }
-.notion-notes-label { font-size: 0.8125rem; font-weight: 600; color: var(--fg2); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.notion-notes-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--fg2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
 #notion-notes {
-  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.9375rem;
-  resize: vertical; min-height: 70px; margin-bottom: 16px; outline: none;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  resize: vertical;
+  min-height: 70px;
+  margin-bottom: 16px;
+  outline: none;
 }
 #notion-notes:focus { border-color: var(--accent); }
 .notion-sheet-btns { display: flex; gap: 8px; }
 #notion-save-btn {
-  flex: 1; padding: 12px; background: var(--accent); color: #fff; border: none;
-  border-radius: 8px; font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500;
-  cursor: pointer; transition: background 0.15s;
+  flex: 1;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 #notion-save-btn:hover { background: var(--accent2); }
 #notion-cancel-btn {
-  padding: 12px 18px; background: var(--bg3); color: var(--fg2); border: 1.5px solid var(--border);
-  border-radius: 8px; font-family: var(--font-body); font-size: 0.9375rem; cursor: pointer;
+  padding: 12px 18px;
+  background: var(--bg3);
+  color: var(--fg2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  cursor: pointer;
 }
 
+/* ── MOBILE adjustments ── */
 @media (max-width: 700px) {
   .view-split #cards-panel { flex: 1; border-right: none; }
   .view-split #map-panel { display: none; }
@@ -353,13 +890,12 @@ body::before {
   .logo { font-size: 1.25rem; }
   #search-btn { padding: 10px 14px; }
 }
+
 @media (min-width: 701px) {
   .header-top { gap: 16px; }
   .events-grid { gap: 14px; }
 }
 </style>
-</head>
-<body>
 
 <!-- CONFIG MODAL -->
 <div id="config-modal">
@@ -368,7 +904,7 @@ body::before {
     <p class="config-sub">Enter your Railway backend URL to enable event search. This is set once and saved to your browser.</p>
     <label class="config-label" for="proxy-url-input">Backend URL</label>
     <input id="proxy-url-input" type="text" placeholder="https://your-app.up.railway.app" autocomplete="off" spellcheck="false">
-    <button id="save-proxy-btn">Save &amp; Continue</button>
+    <button id="save-proxy-btn">Save & Continue</button>
     <p class="config-note">Don't have a backend yet? Follow the setup guide to deploy one to Railway in about 5 minutes.</p>
   </div>
 </div>
@@ -391,8 +927,16 @@ body::before {
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- SHARE BAR -->
+<div id="share-results-bar">
+  <button class="share-bar-close" id="share-bar-close">×</button>
+  <div class="share-bar-title">Share results</div>
+  <div class="share-bar-btns" id="share-bar-btns"></div>
+</div>
+
 <!-- APP -->
 <div id="app">
+  <!-- HEADER -->
   <div id="header">
     <div class="header-top">
       <div class="logo">Even<span>tura</span></div>
@@ -404,6 +948,8 @@ body::before {
         <button id="search-btn">Search</button>
       </div>
     </div>
+
+    <!-- Date tabs -->
     <div class="date-tabs" id="date-tabs">
       <button class="date-tab" data-range="today">Today</button>
       <button class="date-tab" data-range="tomorrow">Tomorrow</button>
@@ -412,16 +958,20 @@ body::before {
       <button class="date-tab" data-range="month">This Month</button>
       <button class="date-tab" data-range="custom">Custom…</button>
     </div>
+
+    <!-- Custom date picker (hidden by default) -->
     <div id="custom-date-row" hidden>
       <input type="date" id="date-from">
       <span>to</span>
       <input type="date" id="date-to">
     </div>
+
+    <!-- Category chips -->
     <div class="category-row" id="category-row">
       <button class="cat-chip" data-cat="all"><span class="cat-emoji">✨</span> All Events</button>
       <button class="cat-chip" data-cat="music"><span class="cat-emoji">🎵</span> Music</button>
-      <button class="cat-chip" data-cat="food"><span class="cat-emoji">🍔</span> Food &amp; Drink</button>
-      <button class="cat-chip" data-cat="arts"><span class="cat-emoji">🎨</span> Arts &amp; Culture</button>
+      <button class="cat-chip" data-cat="food"><span class="cat-emoji">🍔</span> Food & Drink</button>
+      <button class="cat-chip" data-cat="arts"><span class="cat-emoji">🎨</span> Arts & Culture</button>
       <button class="cat-chip" data-cat="comedy"><span class="cat-emoji">🎤</span> Comedy</button>
       <button class="cat-chip" data-cat="festivals"><span class="cat-emoji">🎪</span> Festivals</button>
       <button class="cat-chip" data-cat="sports"><span class="cat-emoji">🏋️</span> Sports</button>
@@ -432,9 +982,14 @@ body::before {
     </div>
   </div>
 
+  <!-- VIEW BAR -->
   <div id="view-bar">
     <div id="result-count"></div>
     <div style="display:flex;gap:8px;align-items:center;">
+      <button id="share-all-btn" style="display:none;padding:6px 12px;border:1.5px solid var(--border);border-radius:7px;background:transparent;color:var(--fg2);font-size:0.8125rem;font-family:var(--font-body);cursor:pointer;display:none;align-items:center;gap:5px;" onclick="openShareBar()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
       <div class="view-toggle">
         <button class="view-btn active" data-view="cards" onclick="setView('cards')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -452,8 +1007,11 @@ body::before {
     </div>
   </div>
 
+  <!-- MAIN -->
   <div id="main">
     <div id="content-area" class="view-cards">
+
+      <!-- CARDS PANEL -->
       <div id="cards-panel">
         <div id="empty-state">
           <div class="empty-icon">🗓️</div>
@@ -467,6 +1025,8 @@ body::before {
         <div id="events-container" class="events-grid" hidden></div>
         <button id="load-more-btn" onclick="loadMore()">Load more results</button>
       </div>
+
+      <!-- MAP PANEL -->
       <div id="map-panel">
         <div id="map-placeholder">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
@@ -478,11 +1038,13 @@ body::before {
           <a id="open-maps-link" class="open-maps-btn" href="#" target="_blank" rel="noopener">Open all in Google Maps →</a>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
+// ── STATE ──
 var PROXY_URL = '';
 var allEvents = [];
 var visibleCount = 10;
@@ -492,6 +1054,7 @@ var selectedCategories = new Set();
 var pendingNotionEvent = null;
 var savedEventIds = new Set();
 
+// Category config
 var CAT_CONFIG = {
   music:    { label: 'Music & Nightlife',    color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',  emoji: '🎵' },
   food:     { label: 'Food & Drink',          color: '#D97706', bg: 'rgba(217,119,6,0.1)',   emoji: '🍔' },
@@ -505,7 +1068,9 @@ var CAT_CONFIG = {
   themed:   { label: 'Themed & Specialty',    color: '#7E22CE', bg: 'rgba(126,34,206,0.1)',  emoji: '🌈' },
 };
 
+// ── INIT ──
 (function init() {
+  // Load saved proxy URL
   try {
     var saved = localStorage.getItem('eventura_proxy');
     if (saved) { PROXY_URL = saved; document.getElementById('config-modal').hidden = true; }
@@ -513,6 +1078,7 @@ var CAT_CONFIG = {
     if (savedIds) savedEventIds = new Set(JSON.parse(savedIds));
   } catch(e) {}
 
+  // Proxy config handlers
   var proxyInput = document.getElementById('proxy-url-input');
   if (PROXY_URL) proxyInput.value = PROXY_URL;
 
@@ -526,15 +1092,18 @@ var CAT_CONFIG = {
     showToast('Backend connected ✓');
   });
 
+  // Date tabs
   document.getElementById('date-tabs').addEventListener('click', function(e) {
     var btn = e.target.closest('.date-tab');
     if (!btn) return;
     document.querySelectorAll('.date-tab').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     selectedRange = btn.dataset.range;
-    document.getElementById('custom-date-row').hidden = selectedRange !== 'custom';
+    var customRow = document.getElementById('custom-date-row');
+    customRow.hidden = selectedRange !== 'custom';
   });
 
+  // Category chips
   document.getElementById('category-row').addEventListener('click', function(e) {
     var chip = e.target.closest('.cat-chip');
     if (!chip) return;
@@ -546,27 +1115,41 @@ var CAT_CONFIG = {
     } else {
       document.querySelector('.cat-chip[data-cat="all"]').classList.remove('active');
       if (selectedCategories.has(cat)) {
-        selectedCategories.delete(cat); chip.classList.remove('active');
+        selectedCategories.delete(cat);
+        chip.classList.remove('active');
       } else {
-        selectedCategories.add(cat); chip.classList.add('active');
+        selectedCategories.add(cat);
+        chip.classList.add('active');
       }
     }
   });
 
+  // Search button
   document.getElementById('search-btn').addEventListener('click', runSearch);
   document.getElementById('location-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') runSearch();
   });
+
+  // Notion modal close
   document.getElementById('notion-cancel-btn').addEventListener('click', function() {
     document.getElementById('notion-modal').classList.remove('open');
   });
   document.getElementById('notion-save-btn').addEventListener('click', saveToNotion);
+
+  // Share bar close
+  document.getElementById('share-bar-close').addEventListener('click', function() {
+    document.getElementById('share-results-bar').classList.remove('visible');
+  });
 })();
 
+// ── DATE HELPERS ──
 function getDateRange() {
   var now = new Date();
   var fmt = function(d) { return d.toISOString().split('T')[0]; };
-  if (selectedRange === 'today') return { from: fmt(now), to: fmt(now), label: 'Today' };
+
+  if (selectedRange === 'today') {
+    return { from: fmt(now), to: fmt(now), label: 'Today' };
+  }
   if (selectedRange === 'tomorrow') {
     var tm = new Date(now); tm.setDate(tm.getDate() + 1);
     return { from: fmt(tm), to: fmt(tm), label: 'Tomorrow' };
@@ -594,18 +1177,25 @@ function getDateRange() {
   return null;
 }
 
+// ── SEARCH ──
 async function runSearch() {
   var location = document.getElementById('location-input').value.trim();
   if (!location) { showToast('Enter a location to search'); return; }
+
   var hasCategory = selectedCategories.size > 0 || document.querySelector('.cat-chip[data-cat="all"].active');
   if (!hasCategory) { showToast('Select at least one event type'); return; }
+
   var dateRange = getDateRange();
   if (!dateRange) { showToast('Set a custom date range first'); return; }
-  if (!PROXY_URL) { document.getElementById('config-modal').hidden = false; return; }
 
-  var cats = selectedCategories.size === 0
-    ? Object.values(CAT_CONFIG).map(function(c) { return c.label; })
-    : Array.from(selectedCategories).map(function(k) { return CAT_CONFIG[k] ? CAT_CONFIG[k].label : k; });
+  if (!PROXY_URL) {
+    document.getElementById('config-modal').hidden = false;
+    return;
+  }
+
+  // Build category list for prompt
+  var cats = selectedCategories.size === 0 ? Object.values(CAT_CONFIG).map(function(c) { return c.label; }) :
+    Array.from(selectedCategories).map(function(k) { return CAT_CONFIG[k] ? CAT_CONFIG[k].label : k; });
 
   showLoading('Searching for events in ' + location + '…');
 
@@ -651,6 +1241,7 @@ Return JSON only.`;
     var data = await response.json();
     if (!response.ok) throw new Error(data.error && data.error.message || 'API error ' + response.status);
 
+    // Handle tool use loop
     var msgs = [{ role: 'user', content: userMsg }];
     var finalData = data;
 
@@ -661,8 +1252,10 @@ Return JSON only.`;
         if (!Array.isArray(c)) c = typeof c === 'string' ? c : 'Search complete.';
         return { type: 'tool_result', tool_use_id: b.id, content: c };
       });
+
       msgs.push({ role: 'assistant', content: finalData.content });
       msgs.push({ role: 'user', content: toolResults });
+
       document.getElementById('loading-text').textContent = 'Processing search results…';
 
       var r2 = await fetch(PROXY_URL + '/api/messages', {
@@ -680,27 +1273,37 @@ Return JSON only.`;
       if (!r2.ok) throw new Error(finalData.error && finalData.error.message || 'API error');
     }
 
+    // Extract text
     var textBlock = finalData.content.find(function(b) { return b.type === 'text'; });
     var rawText = textBlock ? textBlock.text : '';
+
+    // Parse JSON from response
     var jsonMatch = rawText.match(/\[[\s\S]*\]/);
     if (!jsonMatch) throw new Error('No event data in response');
+
     var events = JSON.parse(jsonMatch[0]);
     if (!Array.isArray(events)) throw new Error('Invalid event data');
+
     allEvents = events;
     visibleCount = 10;
     renderResults(location, dateRange.label);
+
   } catch(err) {
     hideLoading();
     showEmpty('Search failed: ' + err.message + '. Check your backend URL and API key.');
   }
 }
 
+// ── RENDER ──
 function renderResults(location, dateLabel) {
   hideLoading();
+
   if (!allEvents.length) {
     showEmpty('No events found in ' + location + ' for ' + dateLabel + '. Try a wider date range or different categories.');
     return;
   }
+
+  // Group by category
   var grouped = {};
   allEvents.forEach(function(ev) {
     var k = ev.category || 'themed';
@@ -711,6 +1314,7 @@ function renderResults(location, dateLabel) {
   var container = document.getElementById('events-container');
   container.innerHTML = '';
   container.hidden = false;
+
   document.getElementById('empty-state').hidden = true;
 
   var total = allEvents.length;
@@ -719,23 +1323,31 @@ function renderResults(location, dateLabel) {
   Object.keys(grouped).forEach(function(cat) {
     var evs = grouped[cat];
     var cfg = CAT_CONFIG[cat] || { label: cat, color: '#888', bg: 'rgba(136,136,136,0.1)', emoji: '📅' };
+
     var section = document.createElement('div');
     section.className = 'category-section';
+
     var header = document.createElement('div');
     header.className = 'category-header';
     header.innerHTML = '<span style="font-size:1.25rem">' + cfg.emoji + '</span>' +
       '<span class="category-header-title">' + cfg.label + '</span>' +
       '<span class="category-header-count">' + evs.length + ' events</span>';
     section.appendChild(header);
-    evs.forEach(function(ev) {
+
+    evs.forEach(function(ev, i) {
       if (shown >= visibleCount) return;
       section.appendChild(buildCard(ev, cfg));
       shown++;
     });
+
     if (shown > 0 || evs.length) container.appendChild(section);
   });
 
-  document.getElementById('result-count').textContent = shown + ' of ' + total + ' events';
+  // Update count
+  var countEl = document.getElementById('result-count');
+  countEl.textContent = shown + ' of ' + total + ' events';
+
+  // Load more
   var loadMoreBtn = document.getElementById('load-more-btn');
   if (shown < total) {
     loadMoreBtn.style.display = 'block';
@@ -743,6 +1355,12 @@ function renderResults(location, dateLabel) {
   } else {
     loadMoreBtn.style.display = 'none';
   }
+
+  // Share all button
+  var shareAllBtn = document.getElementById('share-all-btn');
+  shareAllBtn.style.display = 'flex';
+
+  // Update map
   updateMap();
 }
 
@@ -751,7 +1369,9 @@ function buildCard(ev, cfg) {
   var card = document.createElement('div');
   card.className = 'event-card';
   card.dataset.id = ev.id;
+
   var priceClass = (ev.price || '').toLowerCase() === 'free' ? 'card-price free' : 'card-price';
+
   card.innerHTML =
     '<div class="card-color-bar" style="background:' + cfg.color + '"></div>' +
     '<div class="card-body">' +
@@ -766,7 +1386,9 @@ function buildCard(ev, cfg) {
           '</button>' +
         '</div>' +
       '</div>' +
-      '<div class="card-type-badge" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.emoji + ' ' + cfg.label + '</div>' +
+      '<div class="card-type-badge" style="background:' + cfg.bg + ';color:' + cfg.color + '">' +
+        cfg.emoji + ' ' + cfg.label +
+      '</div>' +
       '<div class="card-meta">' +
         '<div class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>' + escHtml(ev.date || 'TBC') + (ev.time ? ' · ' + escHtml(ev.time) : '') + '</div>' +
         '<div class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escHtml(ev.venue || '') + (ev.city ? ', ' + escHtml(ev.city) : '') + '</div>' +
@@ -777,13 +1399,16 @@ function buildCard(ev, cfg) {
       '</div>' +
       '<div class="share-row">' +
         '<a class="share-btn" href="' + buildWhatsAppLink(ev) + '" target="_blank" rel="noopener">' +
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+          'WhatsApp' +
         '</a>' +
         '<a class="share-btn" href="' + buildEmailLink(ev) + '">' +
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+          'Email' +
         '</a>' +
       '</div>' +
     '</div>';
+
   return card;
 }
 
@@ -792,40 +1417,61 @@ function loadMore() {
   renderResults(document.getElementById('location-input').value, '');
 }
 
+// ── VIEW SWITCHING ──
 function setView(v) {
   currentView = v;
-  document.getElementById('content-area').className = 'view-' + v;
+  var area = document.getElementById('content-area');
+  area.className = 'view-' + v;
   document.querySelectorAll('.view-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.view === v);
   });
 }
 
+// ── MAP ──
 function updateMap() {
   var placeholder = document.getElementById('map-placeholder');
   var frameWrap = document.getElementById('map-frame-wrap');
-  if (!allEvents.length) { placeholder.style.display = 'flex'; frameWrap.style.display = 'none'; return; }
+
+  if (!allEvents.length) {
+    placeholder.style.display = 'flex';
+    frameWrap.style.display = 'none';
+    return;
+  }
+
   placeholder.style.display = 'none';
   frameWrap.style.display = 'flex';
+
   var list = document.getElementById('map-links-list');
   list.innerHTML = '';
+
+  var mapsQuery = allEvents.slice(0, visibleCount).map(function(ev) {
+    return ev.venue + (ev.address ? ', ' + ev.address : '') + (ev.city ? ', ' + ev.city : '');
+  }).join('|');
+
   allEvents.slice(0, visibleCount).forEach(function(ev) {
     var cat = CAT_CONFIG[ev.category] || { color: '#888', emoji: '📅' };
     var query = encodeURIComponent((ev.venue || ev.name) + (ev.city ? ', ' + ev.city : ''));
     var row = document.createElement('a');
     row.className = 'map-event-row';
     row.href = 'https://www.google.com/maps/search/?api=1&query=' + query;
-    row.target = '_blank'; row.rel = 'noopener';
+    row.target = '_blank';
+    row.rel = 'noopener';
     row.innerHTML =
       '<div class="map-dot" style="background:' + cat.color + '"></div>' +
-      '<div class="map-event-info"><div class="map-event-name">' + escHtml(ev.name) + '</div>' +
-      '<div class="map-event-venue">' + escHtml(ev.venue || '') + (ev.city ? ' · ' + escHtml(ev.city) : '') + '</div></div>' +
+      '<div class="map-event-info">' +
+        '<div class="map-event-name">' + escHtml(ev.name) + '</div>' +
+        '<div class="map-event-venue">' + escHtml(ev.venue || '') + (ev.city ? ' · ' + escHtml(ev.city) : '') + '</div>' +
+      '</div>' +
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--fg3);flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     list.appendChild(row);
   });
+
+  // Open all link — searches first venue as anchor
   var firstQuery = allEvents[0] ? encodeURIComponent((allEvents[0].venue || allEvents[0].name) + (allEvents[0].city ? ', ' + allEvents[0].city : '')) : '';
   document.getElementById('open-maps-link').href = 'https://www.google.com/maps/search/?api=1&query=' + firstQuery;
 }
 
+// ── NOTION SAVE ──
 function openNotionSave(evJson) {
   var ev = JSON.parse(evJson);
   pendingNotionEvent = ev;
@@ -844,33 +1490,87 @@ async function saveToNotion() {
   var ev = pendingNotionEvent;
   var notes = document.getElementById('notion-notes').value.trim();
   var btn = document.getElementById('notion-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
   try {
+    // Save via Claude's Notion connector through a special proxy endpoint
+    // We'll construct a minimal page creation request
+    var payload = {
+      notionAction: 'saveEvent',
+      event: {
+        name: ev.name,
+        date: ev.date || '',
+        time: ev.time || '',
+        venue: ev.venue || '',
+        city: ev.city || '',
+        category: ev.category || '',
+        price: ev.price || '',
+        ticketUrl: ev.ticketUrl || '',
+        notes: notes
+      }
+    };
+
     var r = await fetch(PROXY_URL + '/api/notion-save', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ notionAction: 'saveEvent', event: { name: ev.name, date: ev.date||'', time: ev.time||'', venue: ev.venue||'', city: ev.city||'', category: ev.category||'', price: ev.price||'', ticketUrl: ev.ticketUrl||'', notes: notes } })
+      body: JSON.stringify(payload)
     });
+
     if (r.ok) {
       savedEventIds.add(ev.id);
       try { localStorage.setItem('eventura_saved_ids', JSON.stringify(Array.from(savedEventIds))); } catch(e) {}
+      // Update button appearance
       var cardBtn = document.querySelector('.event-card[data-id="' + ev.id + '"] .notion-btn');
       if (cardBtn) cardBtn.classList.add('saved');
       document.getElementById('notion-modal').classList.remove('open');
       showToast('Saved to Notion ✓');
-    } else { throw new Error('Save failed'); }
+    } else {
+      throw new Error('Save failed');
+    }
   } catch(err) {
+    // Fallback: open Notion directly
     document.getElementById('notion-modal').classList.remove('open');
     showToast('Saved locally — open Notion to add manually');
   }
-  btn.disabled = false; btn.textContent = 'Save to Notion';
+
+  btn.disabled = false;
+  btn.textContent = 'Save to Notion';
   pendingNotionEvent = null;
 }
 
+// ── CALENDAR ──
 function addToCalendar(evJson) {
   var ev = JSON.parse(evJson);
+
+  // Build .ics content
+  var now = new Date();
+  var dtStamp = now.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+
+  // Best-effort date parsing
+  var dtStart = 'TZID=Europe/Amsterdam:' + now.toISOString().slice(0,10).replace(/-/g,'') + 'T190000';
+  var dtEnd   = 'TZID=Europe/Amsterdam:' + now.toISOString().slice(0,10).replace(/-/g,'') + 'T220000';
+
+  var ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Eventura//EN',
+    'BEGIN:VEVENT',
+    'UID:' + ev.id + '@eventura',
+    'DTSTAMP:' + dtStamp,
+    'DTSTART;' + dtStart,
+    'DTEND;' + dtEnd,
+    'SUMMARY:' + (ev.name || '').replace(/,/g,'\\,'),
+    'DESCRIPTION:' + (ev.description || '').replace(/\n/g,'\\n').replace(/,/g,'\\,') + (ev.ticketUrl ? '\\n\\nTickets: ' + ev.ticketUrl : ''),
+    'LOCATION:' + (ev.venue || '') + (ev.address ? ', ' + ev.address : '') + (ev.city ? ', ' + ev.city : ''),
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  // Open Google Calendar pre-filled instead (more reliable cross-platform)
   var gcParams = new URLSearchParams({
-    action: 'TEMPLATE', text: ev.name || '',
+    action: 'TEMPLATE',
+    text: ev.name || '',
     details: (ev.description || '') + (ev.ticketUrl ? '\n\nTickets: ' + ev.ticketUrl : ''),
     location: (ev.venue || '') + (ev.city ? ', ' + ev.city : ''),
   });
@@ -878,6 +1578,35 @@ function addToCalendar(evJson) {
   showToast('Opening Google Calendar…');
 }
 
+// ── SHARE ALL ──
+function openShareBar() {
+  if (!allEvents.length) return;
+  var bar = document.getElementById('share-results-bar');
+  var btns = document.getElementById('share-bar-btns');
+  var loc = document.getElementById('location-input').value;
+
+  var text = '🗓 Events in ' + loc + ':\n\n' +
+    allEvents.slice(0, 10).map(function(ev) {
+      return '• ' + ev.name + ' — ' + (ev.date || 'TBC') + (ev.venue ? ' @ ' + ev.venue : '') + (ev.ticketUrl ? '\n  ' + ev.ticketUrl : '');
+    }).join('\n\n');
+
+  var waHref = 'https://wa.me/?text=' + encodeURIComponent(text);
+  var emailHref = 'mailto:?subject=' + encodeURIComponent('Events in ' + loc) + '&body=' + encodeURIComponent(text);
+
+  btns.innerHTML =
+    '<a class="share-bar-btn" href="' + waHref + '" target="_blank" rel="noopener">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+      'WhatsApp' +
+    '</a>' +
+    '<a class="share-bar-btn" href="' + emailHref + '">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+      'Outlook / Email' +
+    '</a>';
+
+  bar.classList.add('visible');
+}
+
+// ── UI HELPERS ──
 function showLoading(msg) {
   document.getElementById('empty-state').hidden = true;
   document.getElementById('events-container').hidden = true;
@@ -887,36 +1616,46 @@ function showLoading(msg) {
   document.getElementById('search-btn').disabled = true;
   document.getElementById('result-count').textContent = '';
 }
+
 function hideLoading() {
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('search-btn').disabled = false;
 }
+
 function showEmpty(msg) {
   document.getElementById('empty-state').hidden = false;
   document.querySelector('.empty-title').textContent = 'No results';
   document.querySelector('.empty-sub').textContent = msg;
   document.getElementById('events-container').hidden = true;
 }
+
 function showToast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg;
+  t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, 2800);
 }
+
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
 function buildWhatsAppLink(ev) {
-  var text = '🎉 ' + ev.name + '\n📅 ' + (ev.date||'TBC') + (ev.time ? ' · ' + ev.time : '') +
-    '\n📍 ' + (ev.venue||'') + (ev.city ? ', ' + ev.city : '') + '\n🎟 ' + (ev.price||'TBC') +
+  var text = '🎉 ' + ev.name + '\n📅 ' + (ev.date || 'TBC') + (ev.time ? ' · ' + ev.time : '') +
+    '\n📍 ' + (ev.venue || '') + (ev.city ? ', ' + ev.city : '') +
+    '\n🎟 ' + (ev.price || 'TBC') +
     (ev.ticketUrl ? '\n\n' + ev.ticketUrl : '');
   return 'https://wa.me/?text=' + encodeURIComponent(text);
 }
+
 function buildEmailLink(ev) {
-  var body = ev.name + '\n\nDate: ' + (ev.date||'TBC') + (ev.time ? ' · ' + ev.time : '') +
-    '\nVenue: ' + (ev.venue||'') + (ev.city ? ', ' + ev.city : '') + '\nPrice: ' + (ev.price||'TBC') +
-    (ev.description ? '\n\n' + ev.description : '') + (ev.ticketUrl ? '\n\nTickets: ' + ev.ticketUrl : '');
-  return 'mailto:?subject=' + encodeURIComponent(ev.name||'Event') + '&body=' + encodeURIComponent(body);
+  var subj = ev.name || 'Event';
+  var body = ev.name + '\n\n' +
+    'Date: ' + (ev.date || 'TBC') + (ev.time ? ' · ' + ev.time : '') + '\n' +
+    'Venue: ' + (ev.venue || '') + (ev.city ? ', ' + ev.city : '') + '\n' +
+    'Price: ' + (ev.price || 'TBC') + '\n' +
+    (ev.description ? '\n' + ev.description + '\n' : '') +
+    (ev.ticketUrl ? '\nTickets: ' + ev.ticketUrl : '');
+  return 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
 }
 </script>
-</body>
-</html>
