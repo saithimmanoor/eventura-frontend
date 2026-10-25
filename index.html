@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Eventura</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap">
+
+<style>
+:root {
+  --bg: #F7F6F4;
+  --bg2: #FFFFFF;
+  --bg3: #EFEDE9;
+  --fg: #1A1917;
+  --fg2: #5A5752;
+  --fg3: #8C8884;
+  --accent: #C8553D;
+  --accent2: #E8927A;
+  --border: #E0DDD8;
+  --card-shadow: 0 1px 3px rgba(26,25,23,0.08), 0 4px 12px rgba(26,25,23,0.05);
+  --radius: 12px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #181715; --bg2: #242220; --bg3: #2E2C29;
+    --fg: #F0EEE9; --fg2: #A8A49E; --fg3: #6E6A64;
+    --accent: #E06B52; --accent2: #C8553D; --border: #3A3835;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #181715; --bg2: #242220; --bg3: #2E2C29;
+  --fg: #F0EEE9; --fg2: #A8A49E; --fg3: #6E6A64;
+  --accent: #E06B52; --accent2: #C8553D; --border: #3A3835;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--bg2);
+  z-index: 100;
+}
+
+#app { display: flex; flex-direction: column; height: 100%; }
+
+#header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 50;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+}
+
+.header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); letter-spacing: -0.02em; flex-shrink: 0; }
+.logo span { color: var(--fg); }
+.search-row { display: flex; gap: 8px; flex: 1; }
+.search-input-wrap { position: relative; flex: 1; }
+.search-input-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--fg3); pointer-events: none; }
+
+#location-input {
+  width: 100%; padding: 10px 12px 10px 38px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg3); color: var(--fg);
+  font-family: var(--font-body); font-size: 0.9375rem;
+  transition: border-color 0.15s; outline: none;
+}
+#location-input::placeholder { color: var(--fg3); }
+#location-input:focus { border-color: var(--accent); background: var(--bg2); }
+
+#search-btn {
+  padding: 10px 18px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-family: var(--font-body);
+  font-size: 0.9375rem; font-weight: 500; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s, transform 0.1s; flex-shrink: 0;
+}
+#search-btn:hover { background: var(--accent2); }
+#search-btn:active { transform: scale(0.97); }
+#search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.date-tabs {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  padding-bottom: 12px; -webkit-overflow-scrolling: touch;
+}
+.date-tabs::-webkit-scrollbar { display: none; }
+.date-tab {
+  padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px;
+  background: transparent; color: var(--fg2); font-family: var(--font-body);
+  font-size: 0.8125rem; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.date-tab:hover { border-color: var(--accent); color: var(--accent); }
+.date-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+#custom-date-row { display: flex; gap: 8px; padding-bottom: 12px; align-items: center; }
+#custom-date-row input[type="date"] {
+  flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.875rem; outline: none;
+}
+#custom-date-row input[type="date"]:focus { border-color: var(--accent); }
+#custom-date-row span { color: var(--fg3); font-size: 0.875rem; flex-shrink: 0; }
+
+.category-row {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  padding-bottom: 14px; -webkit-overflow-scrolling: touch;
+}
+.category-row::-webkit-scrollbar { display: none; }
+.cat-chip {
+  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+  border: 1.5px solid var(--border); border-radius: 20px; background: transparent;
+  color: var(--fg2); font-family: var(--font-body); font-size: 0.8125rem; font-weight: 500;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.cat-chip:hover { border-color: var(--accent); color: var(--accent); }
+.cat-chip.active { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.cat-chip .cat-emoji { font-size: 0.875rem; }
+
+#main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+#view-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--border); background: var(--bg); gap: 12px;
+}
+.view-toggle { display: flex; gap: 2px; background: var(--bg3); border-radius: 8px; padding: 3px; flex-shrink: 0; }
+.view-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+  border: none; border-radius: 6px; background: transparent; color: var(--fg3);
+  font-family: var(--font-body); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.15s;
+}
+.view-btn.active { background: var(--bg2); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.view-btn svg { flex-shrink: 0; }
+#result-count { font-size: 0.875rem; color: var(--fg3); font-variant-numeric: tabular-nums; }
+
+#content-area { flex: 1; overflow: hidden; display: flex; }
+
+#cards-panel {
+  flex: 1; overflow-y: auto;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 80px max(16px, env(safe-area-inset-left, 0px));
+  min-width: 0;
+}
+#map-panel {
+  flex: 1; overflow: hidden; min-width: 0; background: var(--bg3);
+  display: flex; align-items: center; justify-content: center; position: relative;
+}
+
+.view-split #cards-panel { flex: 0 0 420px; border-right: 1px solid var(--border); }
+.view-split #map-panel { flex: 1; }
+.view-cards #map-panel { display: none; }
+.view-cards #cards-panel { flex: 1; }
+.view-map #cards-panel { display: none; }
+.view-map #map-panel { flex: 1; }
+
+#empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 24px; text-align: center; gap: 12px; height: 100%;
+}
+.empty-icon { font-size: 3rem; opacity: 0.4; }
+.empty-title { font-family: var(--font-display); font-size: 1.375rem; color: var(--fg); }
+.empty-sub { font-size: 0.9375rem; color: var(--fg3); max-width: 280px; line-height: 1.5; }
+
+#loading-state {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 24px; gap: 16px; height: 100%;
+}
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 0.9375rem; color: var(--fg3); }
+
+.events-grid { display: flex; flex-direction: column; gap: 12px; }
+.event-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--card-shadow); overflow: hidden; transition: box-shadow 0.2s, transform 0.15s;
+}
+.event-card:hover {
+  box-shadow: 0 4px 16px rgba(26,25,23,0.12), 0 8px 32px rgba(26,25,23,0.08);
+  transform: translateY(-1px);
+}
+.card-color-bar { height: 3px; width: 100%; }
+.card-body { padding: 16px; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.card-title { font-family: var(--font-display); font-size: 1.0625rem; line-height: 1.3; color: var(--fg); text-wrap: balance; flex: 1; min-width: 0; }
+.card-actions { display: flex; gap: 4px; flex-shrink: 0; margin-top: 2px; }
+.icon-btn {
+  width: 32px; height: 32px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg3); color: var(--fg3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg2); }
+.icon-btn.saved { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.card-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.8125rem; color: var(--fg2); }
+.meta-item svg { color: var(--fg3); flex-shrink: 0; }
+.card-type-badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+  border-radius: 20px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 10px;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.card-price { font-size: 0.875rem; font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+.card-price.free { color: #16A34A; }
+.ticket-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+  background: var(--accent); color: #fff; text-decoration: none; border-radius: 7px;
+  font-size: 0.8125rem; font-weight: 500; transition: background 0.15s;
+}
+.ticket-btn:hover { background: var(--accent2); }
+
+.share-row { display: flex; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+.share-btn {
+  display: flex; align-items: center; gap: 5px; padding: 5px 11px;
+  border: 1.5px solid var(--border); border-radius: 7px; background: transparent;
+  color: var(--fg2); font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; text-decoration: none;
+}
+.share-btn:hover { border-color: var(--accent); color: var(--accent); }
+.share-btn svg { flex-shrink: 0; }
+
+.category-section { margin-bottom: 8px; }
+.category-header { display: flex; align-items: center; gap: 8px; padding: 8px 0 10px; }
+.category-header-title { font-family: var(--font-display); font-size: 1.125rem; color: var(--fg); }
+.category-header-count { font-size: 0.8125rem; color: var(--fg3); font-variant-numeric: tabular-nums; }
+
+#load-more-btn {
+  display: none; width: 100%; margin-top: 16px; padding: 12px;
+  border: 1.5px dashed var(--border); border-radius: var(--radius); background: transparent;
+  color: var(--fg2); font-family: var(--font-body); font-size: 0.9375rem; cursor: pointer; transition: all 0.15s;
+}
+#load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+#map-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--fg3); font-size: 0.9375rem; text-align: center; padding: 32px;
+}
+#map-placeholder svg { opacity: 0.3; }
+#map-frame-wrap { display: none; width: 100%; height: 100%; flex-direction: column; }
+#map-links-list { overflow-y: auto; flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.map-event-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  text-decoration: none; color: var(--fg); font-size: 0.875rem; transition: border-color 0.15s;
+}
+.map-event-row:hover { border-color: var(--accent); }
+.map-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.map-event-info { flex: 1; min-width: 0; }
+.map-event-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map-event-venue { font-size: 0.8125rem; color: var(--fg3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.open-maps-btn {
+  display: block; text-align: center; padding: 10px; background: var(--accent); color: #fff;
+  text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: background 0.15s; flex-shrink: 0;
+}
+.open-maps-btn:hover { background: var(--accent2); }
+
+#toast {
+  position: fixed;
+  bottom: max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; z-index: 200; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#config-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.config-box {
+  background: var(--bg2); border-radius: 16px; padding: 28px 24px;
+  max-width: 440px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+.config-title { font-family: var(--font-display); font-size: 1.375rem; margin-bottom: 8px; color: var(--fg); }
+.config-sub { font-size: 0.9375rem; color: var(--fg2); margin-bottom: 20px; line-height: 1.5; }
+.config-label {
+  display: block; font-size: 0.8125rem; font-weight: 600; color: var(--fg2);
+  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px;
+}
+#proxy-url-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.9375rem;
+  margin-bottom: 16px; outline: none;
+}
+#proxy-url-input:focus { border-color: var(--accent); }
+#save-proxy-btn {
+  width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; font-family: var(--font-body); font-size: 1rem; font-weight: 500;
+  cursor: pointer; transition: background 0.15s;
+}
+#save-proxy-btn:hover { background: var(--accent2); }
+.config-note { margin-top: 12px; font-size: 0.8125rem; color: var(--fg3); line-height: 1.5; }
+
+#notion-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
+  display: none; align-items: flex-end; justify-content: center; padding: 0;
+}
+#notion-modal.open { display: flex; }
+.notion-sheet {
+  background: var(--bg2); border-radius: 16px 16px 0 0;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  width: 100%; max-width: 540px; box-shadow: 0 -4px 32px rgba(0,0,0,0.2);
+}
+.sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.sheet-title { font-family: var(--font-display); font-size: 1.125rem; margin-bottom: 16px; color: var(--fg); }
+.notion-event-preview { background: var(--bg3); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9375rem; color: var(--fg); line-height: 1.5; }
+.notion-event-preview strong { font-weight: 600; }
+.notion-notes-label { font-size: 0.8125rem; font-weight: 600; color: var(--fg2); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+#notion-notes {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg3); color: var(--fg); font-family: var(--font-body); font-size: 0.9375rem;
+  resize: vertical; min-height: 70px; margin-bottom: 16px; outline: none;
+}
+#notion-notes:focus { border-color: var(--accent); }
+.notion-sheet-btns { display: flex; gap: 8px; }
+#notion-save-btn {
+  flex: 1; padding: 12px; background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500;
+  cursor: pointer; transition: background 0.15s;
+}
+#notion-save-btn:hover { background: var(--accent2); }
+#notion-cancel-btn {
+  padding: 12px 18px; background: var(--bg3); color: var(--fg2); border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: var(--font-body); font-size: 0.9375rem; cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .view-split #cards-panel { flex: 1; border-right: none; }
+  .view-split #map-panel { display: none; }
+  .view-split.mobile-map #cards-panel { display: none; }
+  .view-split.mobile-map #map-panel { display: flex; flex: 1; }
+  .logo { font-size: 1.25rem; }
+  #search-btn { padding: 10px 14px; }
+}
+@media (min-width: 701px) {
+  .header-top { gap: 16px; }
+  .events-grid { gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CONFIG MODAL -->
+<div id="config-modal">
+  <div class="config-box">
+    <div class="config-title">Connect Eventura</div>
+    <p class="config-sub">Enter your Railway backend URL to enable event search. This is set once and saved to your browser.</p>
+    <label class="config-label" for="proxy-url-input">Backend URL</label>
+    <input id="proxy-url-input" type="text" placeholder="https://your-app.up.railway.app" autocomplete="off" spellcheck="false">
+    <button id="save-proxy-btn">Save &amp; Continue</button>
+    <p class="config-note">Don't have a backend yet? Follow the setup guide to deploy one to Railway in about 5 minutes.</p>
+  </div>
+</div>
+
+<!-- NOTION SAVE MODAL -->
+<div id="notion-modal">
+  <div class="notion-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Save to Eventura</div>
+    <div class="notion-event-preview" id="notion-preview"></div>
+    <label class="notion-notes-label" for="notion-notes">Notes (optional)</label>
+    <textarea id="notion-notes" placeholder="Why you want to go, who to bring…"></textarea>
+    <div class="notion-sheet-btns">
+      <button id="notion-cancel-btn">Cancel</button>
+      <button id="notion-save-btn">Save to Notion</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- APP -->
+<div id="app">
+  <div id="header">
+    <div class="header-top">
+      <div class="logo">Even<span>tura</span></div>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="location-input" type="text" placeholder="City, e.g. Amsterdam" autocomplete="off" spellcheck="false">
+        </div>
+        <button id="search-btn">Search</button>
+      </div>
+    </div>
+    <div class="date-tabs" id="date-tabs">
+      <button class="date-tab" data-range="today">Today</button>
+      <button class="date-tab" data-range="tomorrow">Tomorrow</button>
+      <button class="date-tab active" data-range="weekend">This Weekend</button>
+      <button class="date-tab" data-range="week">This Week</button>
+      <button class="date-tab" data-range="month">This Month</button>
+      <button class="date-tab" data-range="custom">Custom…</button>
+    </div>
+    <div id="custom-date-row" hidden>
+      <input type="date" id="date-from">
+      <span>to</span>
+      <input type="date" id="date-to">
+    </div>
+    <div class="category-row" id="category-row">
+      <button class="cat-chip" data-cat="all"><span class="cat-emoji">✨</span> All Events</button>
+      <button class="cat-chip" data-cat="music"><span class="cat-emoji">🎵</span> Music</button>
+      <button class="cat-chip" data-cat="food"><span class="cat-emoji">🍔</span> Food &amp; Drink</button>
+      <button class="cat-chip" data-cat="arts"><span class="cat-emoji">🎨</span> Arts &amp; Culture</button>
+      <button class="cat-chip" data-cat="comedy"><span class="cat-emoji">🎤</span> Comedy</button>
+      <button class="cat-chip" data-cat="festivals"><span class="cat-emoji">🎪</span> Festivals</button>
+      <button class="cat-chip" data-cat="sports"><span class="cat-emoji">🏋️</span> Sports</button>
+      <button class="cat-chip" data-cat="wellness"><span class="cat-emoji">🧘</span> Wellness</button>
+      <button class="cat-chip" data-cat="family"><span class="cat-emoji">👨‍👩‍👧</span> Family</button>
+      <button class="cat-chip" data-cat="learning"><span class="cat-emoji">💡</span> Learning</button>
+      <button class="cat-chip" data-cat="themed"><span class="cat-emoji">🌈</span> Themed</button>
+    </div>
+  </div>
+
+  <div id="view-bar">
+    <div id="result-count"></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="cards" onclick="setView('cards')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Cards
+        </button>
+        <button class="view-btn" data-view="map" onclick="setView('map')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          Map
+        </button>
+        <button class="view-btn" data-view="split" onclick="setView('split')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          Split
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="content-area" class="view-cards">
+      <div id="cards-panel">
+        <div id="empty-state">
+          <div class="empty-icon">🗓️</div>
+          <div class="empty-title">Discover what's on</div>
+          <div class="empty-sub">Pick a location, date range, and at least one event type — then search.</div>
+        </div>
+        <div id="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text" id="loading-text">Searching for events…</div>
+        </div>
+        <div id="events-container" class="events-grid" hidden></div>
+        <button id="load-more-btn" onclick="loadMore()">Load more results</button>
+      </div>
+      <div id="map-panel">
+        <div id="map-placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          <div>Map shows event locations</div>
+          <div style="font-size:0.8125rem;opacity:0.6;">Run a search to see results</div>
+        </div>
+        <div id="map-frame-wrap">
+          <div id="map-links-list"></div>
+          <a id="open-maps-link" class="open-maps-btn" href="#" target="_blank" rel="noopener">Open all in Google Maps →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var PROXY_URL = '';
+var allEvents = [];
+var visibleCount = 10;
+var currentView = 'cards';
+var selectedRange = 'weekend';
+var selectedCategories = new Set();
+var pendingNotionEvent = null;
+var savedEventIds = new Set();
+
+var CAT_CONFIG = {
+  music:    { label: 'Music & Nightlife',    color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',  emoji: '🎵' },
+  food:     { label: 'Food & Drink',          color: '#D97706', bg: 'rgba(217,119,6,0.1)',   emoji: '🍔' },
+  arts:     { label: 'Arts & Culture',        color: '#DB2777', bg: 'rgba(219,39,119,0.1)',  emoji: '🎨' },
+  comedy:   { label: 'Comedy',                color: '#CA8A04', bg: 'rgba(202,138,4,0.1)',   emoji: '🎤' },
+  festivals:{ label: 'Festivals & Fairs',     color: '#16A34A', bg: 'rgba(22,163,74,0.1)',   emoji: '🎪' },
+  sports:   { label: 'Sports & Outdoor',      color: '#2563EB', bg: 'rgba(37,99,235,0.1)',   emoji: '🏋️' },
+  wellness: { label: 'Wellness & Lifestyle',  color: '#0D9488', bg: 'rgba(13,148,136,0.1)',  emoji: '🧘' },
+  family:   { label: 'Family & Community',    color: '#9A3412', bg: 'rgba(154,52,18,0.1)',   emoji: '👨‍👩‍👧' },
+  learning: { label: 'Learning & Networking', color: '#475569', bg: 'rgba(71,85,105,0.1)',   emoji: '💡' },
+  themed:   { label: 'Themed & Specialty',    color: '#7E22CE', bg: 'rgba(126,34,206,0.1)',  emoji: '🌈' },
+};
+
+(function init() {
+  try {
+    var saved = localStorage.getItem('eventura_proxy');
+    if (saved) { PROXY_URL = saved; document.getElementById('config-modal').hidden = true; }
+    var savedIds = localStorage.getItem('eventura_saved_ids');
+    if (savedIds) savedEventIds = new Set(JSON.parse(savedIds));
+  } catch(e) {}
+
+  var proxyInput = document.getElementById('proxy-url-input');
+  if (PROXY_URL) proxyInput.value = PROXY_URL;
+
+  document.getElementById('save-proxy-btn').addEventListener('click', function() {
+    var url = proxyInput.value.trim().replace(/\/$/, '');
+    if (!url) { showToast('Please enter a backend URL'); return; }
+    if (!url.startsWith('http')) url = 'https://' + url;
+    PROXY_URL = url;
+    try { localStorage.setItem('eventura_proxy', url); } catch(e) {}
+    document.getElementById('config-modal').hidden = true;
+    showToast('Backend connected ✓');
+  });
+
+  document.getElementById('date-tabs').addEventListener('click', function(e) {
+    var btn = e.target.closest('.date-tab');
+    if (!btn) return;
+    document.querySelectorAll('.date-tab').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    selectedRange = btn.dataset.range;
+    document.getElementById('custom-date-row').hidden = selectedRange !== 'custom';
+  });
+
+  document.getElementById('category-row').addEventListener('click', function(e) {
+    var chip = e.target.closest('.cat-chip');
+    if (!chip) return;
+    var cat = chip.dataset.cat;
+    if (cat === 'all') {
+      selectedCategories.clear();
+      document.querySelectorAll('.cat-chip').forEach(function(c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+    } else {
+      document.querySelector('.cat-chip[data-cat="all"]').classList.remove('active');
+      if (selectedCategories.has(cat)) {
+        selectedCategories.delete(cat); chip.classList.remove('active');
+      } else {
+        selectedCategories.add(cat); chip.classList.add('active');
+      }
+    }
+  });
+
+  document.getElementById('search-btn').addEventListener('click', runSearch);
+  document.getElementById('location-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') runSearch();
+  });
+  document.getElementById('notion-cancel-btn').addEventListener('click', function() {
+    document.getElementById('notion-modal').classList.remove('open');
+  });
+  document.getElementById('notion-save-btn').addEventListener('click', saveToNotion);
+})();
+
+function getDateRange() {
+  var now = new Date();
+  var fmt = function(d) { return d.toISOString().split('T')[0]; };
+  if (selectedRange === 'today') return { from: fmt(now), to: fmt(now), label: 'Today' };
+  if (selectedRange === 'tomorrow') {
+    var tm = new Date(now); tm.setDate(tm.getDate() + 1);
+    return { from: fmt(tm), to: fmt(tm), label: 'Tomorrow' };
+  }
+  if (selectedRange === 'weekend') {
+    var day = now.getDay();
+    var sat = new Date(now); sat.setDate(now.getDate() + ((6 - day + 7) % 7 || 7));
+    var sun = new Date(sat); sun.setDate(sat.getDate() + 1);
+    return { from: fmt(sat), to: fmt(sun), label: 'This Weekend' };
+  }
+  if (selectedRange === 'week') {
+    var end = new Date(now); end.setDate(now.getDate() + 7);
+    return { from: fmt(now), to: fmt(end), label: 'This Week' };
+  }
+  if (selectedRange === 'month') {
+    var end2 = new Date(now); end2.setDate(now.getDate() + 30);
+    return { from: fmt(now), to: fmt(end2), label: 'This Month' };
+  }
+  if (selectedRange === 'custom') {
+    var f = document.getElementById('date-from').value;
+    var t = document.getElementById('date-to').value;
+    if (!f || !t) return null;
+    return { from: f, to: t, label: f + ' to ' + t };
+  }
+  return null;
+}
+
+async function runSearch() {
+  var location = document.getElementById('location-input').value.trim();
+  if (!location) { showToast('Enter a location to search'); return; }
+  var hasCategory = selectedCategories.size > 0 || document.querySelector('.cat-chip[data-cat="all"].active');
+  if (!hasCategory) { showToast('Select at least one event type'); return; }
+  var dateRange = getDateRange();
+  if (!dateRange) { showToast('Set a custom date range first'); return; }
+  if (!PROXY_URL) { document.getElementById('config-modal').hidden = false; return; }
+
+  var cats = selectedCategories.size === 0
+    ? Object.values(CAT_CONFIG).map(function(c) { return c.label; })
+    : Array.from(selectedCategories).map(function(k) { return CAT_CONFIG[k] ? CAT_CONFIG[k].label : k; });
+
+  showLoading('Searching for events in ' + location + '…');
+
+  var systemPrompt = `You are an event discovery agent. Find real, upcoming events based on the user's query. Search broadly and return results as a JSON array.
+
+For each event return this exact structure:
+{
+  "id": "unique string",
+  "name": "Event name",
+  "category": one of ["music","food","arts","comedy","festivals","sports","wellness","family","learning","themed"],
+  "date": "e.g. Saturday 25 Oct 2026",
+  "time": "e.g. 20:00 – 23:00 or TBC",
+  "venue": "Venue name",
+  "city": "City name",
+  "address": "Full address if available",
+  "description": "1-2 sentence description",
+  "price": "e.g. €15 / Free / From €25 or TBC",
+  "ticketUrl": "URL to tickets or event page",
+  "lat": latitude as number or null,
+  "lng": longitude as number or null
+}
+
+Return ONLY valid JSON array, no markdown, no commentary. Return up to 30 events across the requested categories. If fewer results exist, return what you find. Mark dates as TBC only if genuinely unclear.`;
+
+  var userMsg = `Find upcoming events in ${location} from ${dateRange.from} to ${dateRange.to}.
+Event categories to search: ${cats.join(', ')}.
+Search Eventbrite, Songkick, Resident Advisor, Meetup, TimeOut, Fever, local guides and tourism boards.
+Return JSON only.`;
+
+  try {
+    var response = await fetch(PROXY_URL + '/api/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
+        system: systemPrompt,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+
+    var data = await response.json();
+    if (!response.ok) throw new Error(data.error && data.error.message || 'API error ' + response.status);
+
+    var msgs = [{ role: 'user', content: userMsg }];
+    var finalData = data;
+
+    while (finalData.stop_reason === 'tool_use') {
+      var toolUses = finalData.content.filter(function(b) { return b.type === 'tool_use'; });
+      var toolResults = toolUses.map(function(b) {
+        var c = b.content;
+        if (!Array.isArray(c)) c = typeof c === 'string' ? c : 'Search complete.';
+        return { type: 'tool_result', tool_use_id: b.id, content: c };
+      });
+      msgs.push({ role: 'assistant', content: finalData.content });
+      msgs.push({ role: 'user', content: toolResults });
+      document.getElementById('loading-text').textContent = 'Processing search results…';
+
+      var r2 = await fetch(PROXY_URL + '/api/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8000,
+          system: systemPrompt,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          messages: msgs
+        })
+      });
+      finalData = await r2.json();
+      if (!r2.ok) throw new Error(finalData.error && finalData.error.message || 'API error');
+    }
+
+    var textBlock = finalData.content.find(function(b) { return b.type === 'text'; });
+    var rawText = textBlock ? textBlock.text : '';
+    var jsonMatch = rawText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('No event data in response');
+    var events = JSON.parse(jsonMatch[0]);
+    if (!Array.isArray(events)) throw new Error('Invalid event data');
+    allEvents = events;
+    visibleCount = 10;
+    renderResults(location, dateRange.label);
+  } catch(err) {
+    hideLoading();
+    showEmpty('Search failed: ' + err.message + '. Check your backend URL and API key.');
+  }
+}
+
+function renderResults(location, dateLabel) {
+  hideLoading();
+  if (!allEvents.length) {
+    showEmpty('No events found in ' + location + ' for ' + dateLabel + '. Try a wider date range or different categories.');
+    return;
+  }
+  var grouped = {};
+  allEvents.forEach(function(ev) {
+    var k = ev.category || 'themed';
+    if (!grouped[k]) grouped[k] = [];
+    grouped[k].push(ev);
+  });
+
+  var container = document.getElementById('events-container');
+  container.innerHTML = '';
+  container.hidden = false;
+  document.getElementById('empty-state').hidden = true;
+
+  var total = allEvents.length;
+  var shown = 0;
+
+  Object.keys(grouped).forEach(function(cat) {
+    var evs = grouped[cat];
+    var cfg = CAT_CONFIG[cat] || { label: cat, color: '#888', bg: 'rgba(136,136,136,0.1)', emoji: '📅' };
+    var section = document.createElement('div');
+    section.className = 'category-section';
+    var header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = '<span style="font-size:1.25rem">' + cfg.emoji + '</span>' +
+      '<span class="category-header-title">' + cfg.label + '</span>' +
+      '<span class="category-header-count">' + evs.length + ' events</span>';
+    section.appendChild(header);
+    evs.forEach(function(ev) {
+      if (shown >= visibleCount) return;
+      section.appendChild(buildCard(ev, cfg));
+      shown++;
+    });
+    if (shown > 0 || evs.length) container.appendChild(section);
+  });
+
+  document.getElementById('result-count').textContent = shown + ' of ' + total + ' events';
+  var loadMoreBtn = document.getElementById('load-more-btn');
+  if (shown < total) {
+    loadMoreBtn.style.display = 'block';
+    loadMoreBtn.textContent = 'Load ' + Math.min(10, total - shown) + ' more results';
+  } else {
+    loadMoreBtn.style.display = 'none';
+  }
+  updateMap();
+}
+
+function buildCard(ev, cfg) {
+  var isSaved = savedEventIds.has(ev.id);
+  var card = document.createElement('div');
+  card.className = 'event-card';
+  card.dataset.id = ev.id;
+  var priceClass = (ev.price || '').toLowerCase() === 'free' ? 'card-price free' : 'card-price';
+  card.innerHTML =
+    '<div class="card-color-bar" style="background:' + cfg.color + '"></div>' +
+    '<div class="card-body">' +
+      '<div class="card-top">' +
+        '<div class="card-title">' + escHtml(ev.name) + '</div>' +
+        '<div class="card-actions">' +
+          '<button class="icon-btn notion-btn' + (isSaved ? ' saved' : '') + '" title="Save to Notion" onclick="openNotionSave(' + JSON.stringify(JSON.stringify(ev)).replace(/</g,'\\u003c') + ')">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
+          '</button>' +
+          '<button class="icon-btn cal-btn" title="Add to Google Calendar" onclick="addToCalendar(' + JSON.stringify(JSON.stringify(ev)).replace(/</g,'\\u003c') + ')">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-type-badge" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.emoji + ' ' + cfg.label + '</div>' +
+      '<div class="card-meta">' +
+        '<div class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>' + escHtml(ev.date || 'TBC') + (ev.time ? ' · ' + escHtml(ev.time) : '') + '</div>' +
+        '<div class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escHtml(ev.venue || '') + (ev.city ? ', ' + escHtml(ev.city) : '') + '</div>' +
+      '</div>' +
+      '<div class="card-footer">' +
+        '<div class="' + priceClass + '">' + escHtml(ev.price || 'TBC') + '</div>' +
+        (ev.ticketUrl ? '<a class="ticket-btn" href="' + escHtml(ev.ticketUrl) + '" target="_blank" rel="noopener">Tickets →</a>' : '') +
+      '</div>' +
+      '<div class="share-row">' +
+        '<a class="share-btn" href="' + buildWhatsAppLink(ev) + '" target="_blank" rel="noopener">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp' +
+        '</a>' +
+        '<a class="share-btn" href="' + buildEmailLink(ev) + '">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email' +
+        '</a>' +
+      '</div>' +
+    '</div>';
+  return card;
+}
+
+function loadMore() {
+  visibleCount += 10;
+  renderResults(document.getElementById('location-input').value, '');
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('content-area').className = 'view-' + v;
+  document.querySelectorAll('.view-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.view === v);
+  });
+}
+
+function updateMap() {
+  var placeholder = document.getElementById('map-placeholder');
+  var frameWrap = document.getElementById('map-frame-wrap');
+  if (!allEvents.length) { placeholder.style.display = 'flex'; frameWrap.style.display = 'none'; return; }
+  placeholder.style.display = 'none';
+  frameWrap.style.display = 'flex';
+  var list = document.getElementById('map-links-list');
+  list.innerHTML = '';
+  allEvents.slice(0, visibleCount).forEach(function(ev) {
+    var cat = CAT_CONFIG[ev.category] || { color: '#888', emoji: '📅' };
+    var query = encodeURIComponent((ev.venue || ev.name) + (ev.city ? ', ' + ev.city : ''));
+    var row = document.createElement('a');
+    row.className = 'map-event-row';
+    row.href = 'https://www.google.com/maps/search/?api=1&query=' + query;
+    row.target = '_blank'; row.rel = 'noopener';
+    row.innerHTML =
+      '<div class="map-dot" style="background:' + cat.color + '"></div>' +
+      '<div class="map-event-info"><div class="map-event-name">' + escHtml(ev.name) + '</div>' +
+      '<div class="map-event-venue">' + escHtml(ev.venue || '') + (ev.city ? ' · ' + escHtml(ev.city) : '') + '</div></div>' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--fg3);flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    list.appendChild(row);
+  });
+  var firstQuery = allEvents[0] ? encodeURIComponent((allEvents[0].venue || allEvents[0].name) + (allEvents[0].city ? ', ' + allEvents[0].city : '')) : '';
+  document.getElementById('open-maps-link').href = 'https://www.google.com/maps/search/?api=1&query=' + firstQuery;
+}
+
+function openNotionSave(evJson) {
+  var ev = JSON.parse(evJson);
+  pendingNotionEvent = ev;
+  var preview = document.getElementById('notion-preview');
+  preview.innerHTML =
+    '<strong>' + escHtml(ev.name) + '</strong><br>' +
+    (ev.date ? '📅 ' + escHtml(ev.date) + (ev.time ? ' · ' + escHtml(ev.time) : '') + '<br>' : '') +
+    (ev.venue ? '📍 ' + escHtml(ev.venue) + (ev.city ? ', ' + escHtml(ev.city) : '') + '<br>' : '') +
+    (ev.price ? '🎟 ' + escHtml(ev.price) : '');
+  document.getElementById('notion-notes').value = '';
+  document.getElementById('notion-modal').classList.add('open');
+}
+
+async function saveToNotion() {
+  if (!pendingNotionEvent) return;
+  var ev = pendingNotionEvent;
+  var notes = document.getElementById('notion-notes').value.trim();
+  var btn = document.getElementById('notion-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    var r = await fetch(PROXY_URL + '/api/notion-save', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ notionAction: 'saveEvent', event: { name: ev.name, date: ev.date||'', time: ev.time||'', venue: ev.venue||'', city: ev.city||'', category: ev.category||'', price: ev.price||'', ticketUrl: ev.ticketUrl||'', notes: notes } })
+    });
+    if (r.ok) {
+      savedEventIds.add(ev.id);
+      try { localStorage.setItem('eventura_saved_ids', JSON.stringify(Array.from(savedEventIds))); } catch(e) {}
+      var cardBtn = document.querySelector('.event-card[data-id="' + ev.id + '"] .notion-btn');
+      if (cardBtn) cardBtn.classList.add('saved');
+      document.getElementById('notion-modal').classList.remove('open');
+      showToast('Saved to Notion ✓');
+    } else { throw new Error('Save failed'); }
+  } catch(err) {
+    document.getElementById('notion-modal').classList.remove('open');
+    showToast('Saved locally — open Notion to add manually');
+  }
+  btn.disabled = false; btn.textContent = 'Save to Notion';
+  pendingNotionEvent = null;
+}
+
+function addToCalendar(evJson) {
+  var ev = JSON.parse(evJson);
+  var gcParams = new URLSearchParams({
+    action: 'TEMPLATE', text: ev.name || '',
+    details: (ev.description || '') + (ev.ticketUrl ? '\n\nTickets: ' + ev.ticketUrl : ''),
+    location: (ev.venue || '') + (ev.city ? ', ' + ev.city : ''),
+  });
+  window.open('https://calendar.google.com/calendar/render?' + gcParams.toString(), '_blank');
+  showToast('Opening Google Calendar…');
+}
+
+function showLoading(msg) {
+  document.getElementById('empty-state').hidden = true;
+  document.getElementById('events-container').hidden = true;
+  document.getElementById('load-more-btn').style.display = 'none';
+  document.getElementById('loading-text').textContent = msg || 'Searching…';
+  document.getElementById('loading-state').style.display = 'flex';
+  document.getElementById('search-btn').disabled = true;
+  document.getElementById('result-count').textContent = '';
+}
+function hideLoading() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('search-btn').disabled = false;
+}
+function showEmpty(msg) {
+  document.getElementById('empty-state').hidden = false;
+  document.querySelector('.empty-title').textContent = 'No results';
+  document.querySelector('.empty-sub').textContent = msg;
+  document.getElementById('events-container').hidden = true;
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function buildWhatsAppLink(ev) {
+  var text = '🎉 ' + ev.name + '\n📅 ' + (ev.date||'TBC') + (ev.time ? ' · ' + ev.time : '') +
+    '\n📍 ' + (ev.venue||'') + (ev.city ? ', ' + ev.city : '') + '\n🎟 ' + (ev.price||'TBC') +
+    (ev.ticketUrl ? '\n\n' + ev.ticketUrl : '');
+  return 'https://wa.me/?text=' + encodeURIComponent(text);
+}
+function buildEmailLink(ev) {
+  var body = ev.name + '\n\nDate: ' + (ev.date||'TBC') + (ev.time ? ' · ' + ev.time : '') +
+    '\nVenue: ' + (ev.venue||'') + (ev.city ? ', ' + ev.city : '') + '\nPrice: ' + (ev.price||'TBC') +
+    (ev.description ? '\n\n' + ev.description : '') + (ev.ticketUrl ? '\n\nTickets: ' + ev.ticketUrl : '');
+  return 'mailto:?subject=' + encodeURIComponent(ev.name||'Event') + '&body=' + encodeURIComponent(body);
+}
+</script>
+</body>
+</html>
