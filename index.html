@@ -1072,8 +1072,9 @@ var CAT_CONFIG = {
 (function init() {
   // Load saved proxy URL
   try {
-    var saved = localStorage.getItem('eventura_proxy');
-    if (saved) { PROXY_URL = saved; document.getElementById('config-modal').hidden = true; }
+    // Always use the Netlify function — ignore any saved Railway URL
+    PROXY_URL = '/.netlify/functions/proxy';
+    document.getElementById('config-modal').hidden = true;
     var savedIds = localStorage.getItem('eventura_saved_ids');
     if (savedIds) savedEventIds = new Set(JSON.parse(savedIds));
   } catch(e) {}
@@ -1085,7 +1086,6 @@ var CAT_CONFIG = {
   document.getElementById('save-proxy-btn').addEventListener('click', function() {
     var url = proxyInput.value.trim().replace(/\/$/, '');
     if (!url) { showToast('Please enter a backend URL'); return; }
-    if (!url.startsWith('http')) url = 'https://' + url;
     PROXY_URL = url;
     try { localStorage.setItem('eventura_proxy', url); } catch(e) {}
     document.getElementById('config-modal').hidden = true;
