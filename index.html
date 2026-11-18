@@ -401,9 +401,10 @@ body::before {
   overflow: hidden;
   transition: box-shadow 0.2s, transform 0.15s;
 }
+.event-card[style*="cursor"] { cursor: pointer; }
 .event-card:hover {
   box-shadow: 0 4px 16px rgba(26,25,23,0.12), 0 8px 32px rgba(26,25,23,0.08);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .card-color-bar {
@@ -1351,6 +1352,13 @@ function buildCard(ev, cfg) {
   var card = document.createElement('div');
   card.className = 'event-card';
   card.dataset.id = ev.id;
+  if (ev.ticketUrl) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      window.open(ev.ticketUrl, '_blank', 'noopener');
+    });
+  }
 
   var priceClass = (ev.price || '').toLowerCase() === 'free' ? 'card-price free' : 'card-price';
 
