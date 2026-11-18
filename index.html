@@ -1199,31 +1199,13 @@ async function runSearch() {
 
   showLoading('Searching for events in ' + location + '…');
 
-  var systemPrompt = `You are an event discovery agent. Find real, upcoming events based on the user's query. Search broadly and return results as a JSON array.
+  var systemPrompt = `You are an event discovery agent. Search for real upcoming events and return a JSON array. Be fast — do 1-2 searches maximum.
 
-For each event return this exact structure:
-{
-  "id": "unique string",
-  "name": "Event name",
-  "category": one of ["music","food","arts","comedy","festivals","sports","wellness","family","learning","themed"],
-  "date": "e.g. Saturday 25 Oct 2026",
-  "time": "e.g. 20:00 – 23:00 or TBC",
-  "venue": "Venue name",
-  "city": "City name",
-  "address": "Full address if available",
-  "description": "1-2 sentence description",
-  "price": "e.g. €15 / Free / From €25 or TBC",
-  "ticketUrl": "URL to tickets or event page",
-  "lat": latitude as number or null,
-  "lng": longitude as number or null
-}
+Each event: {"id":"unique","name":"Event name","category":"music|food|arts|comedy|festivals|sports|wellness|family|learning|themed","date":"e.g. Sat 21 Nov 2026","time":"e.g. 20:00 or TBC","venue":"Venue name","city":"City","address":"Address or null","description":"One sentence.","price":"e.g. €15 or Free","ticketUrl":"URL","lat":null,"lng":null}
 
-Return ONLY valid JSON array, no markdown, no commentary. Return up to 30 events across the requested categories. If fewer results exist, return what you find. Mark dates as TBC only if genuinely unclear.`;
+Return ONLY a valid JSON array of 6-10 events. No markdown, no commentary, no extra text.`;
 
-  var userMsg = `Find upcoming events in ${location} from ${dateRange.from} to ${dateRange.to}.
-Event categories to search: ${cats.join(', ')}.
-Search Eventbrite, Songkick, Resident Advisor, Meetup, TimeOut, Fever, local guides and tourism boards.
-Return JSON only.`;
+  var userMsg = `Find 6-10 upcoming events in ${location} from ${dateRange.from} to ${dateRange.to}. Categories: ${cats.join(', ')}. Return JSON array only.`;
 
   try {
     var response = await fetch(PROXY_URL, {
